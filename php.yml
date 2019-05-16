@@ -1,0 +1,61 @@
+- name: install packages
+  become: yes
+  apt:
+    name: "{{ packages }}"
+  vars:
+    packages:
+    - apache2
+    - git
+    - mcrypt
+    - nginx
+    - php
+    - libmcrypt-dev
+    - php-curl
+    - php-dom
+    - php-fpm
+    - php-intl
+    - php-json
+    - php-mbstring
+    - php-sqlite3
+    - sqlite3
+- name: create /var/www/ directory
+  file: dest=/var/www/ state=directory owner=www-data group=www-data mode=0700
+  become: yes
+- name: Clone git repository
+  become: yes
+  git: >
+     dest=/var/www/laravel
+     repo=https://github.com/laravel/laravel.git
+     update=no
+  register: cloned
+- name: resolve proc_open 1
+  raw: /bin/dd if=/dev/zero of=/var/swap.1 bs=1M count=1024
+  become: yes
+- name: resolve proc_open 2
+  raw: /sbin/mkswap /var/swap.1
+  become: yes
+- name: resolve proc_open 3
+  raw: /sbin/swapon /var/swap.1
+  become: yes
+- name: install composer
+  become: yes
+  shell: curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
+  args:
+    creates: /usr/local/bin/composer
+- name: composer create-project
+  composer: command=install working_dir=/var/www/laravel optimize_autoloader=no
+  become: yes
+  when: cloned is successful
+- name: create ".env"
+  become: yes
+  raw: cp /var/www/laravel/.env.example /var/www/laravel/.env
+- name: generate key
+  become: yes
+  raw: php /var/www/laravel/artisan key:generate
+- name: set APP_DEBUG=false
+  become: yes
+  lineinfile: dest=/var/www/laravel/.env regexp='^APP_DEBUG=' line=APP_DEBUG=false
+- name: set APP_ENV=production
+  become: yes
+  lineinfile: dest=/var/www/laravel/.env regexp='^APP_ENV=' line=APP_ENV=production
+

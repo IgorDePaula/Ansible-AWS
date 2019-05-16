@@ -1,0 +1,33 @@
+- name: rds launcher
+  hosts: localhost
+  connection: local
+  tasks:
+  - name: lauching rds
+    local_action:
+      module: rds_instance
+            instance_type=db.t2.micro
+            allocated_storage=15
+            availability_zone=us-east-1d
+            backup_retention_period=35
+            region=us-east-1
+            db_instance_class=db.t2.micro
+            db_instance_identifier=testeansible2
+            db_name=testeansible2
+            engine=mysql
+            master_user_password=teste123
+            master_username=teste
+            port=3306
+            publicly_accessible=true
+            state=present
+            storage_type=standard
+            wait=yes
+            vpc_security_group_ids=sg-9bca77e3
+    register: rdsserver
+  - debug: var=rdsserver
+
+
+
+
+
+
+

@@ -1,0 +1,45 @@
+- name: ec2 launcher
+  hosts: localhost
+  remote_user: ubuntu
+  connection: local
+  tasks:
+  - name: lauching ec2
+    local_action:
+      module: ec2
+            instance_type=t2.micro
+            key_name=Aplicacao-tandle
+            image=ami-0a313d6098716f372
+            region=us-east-1
+            group=launch-wizard-1
+            count=1
+            vpc_subnet_id=subnet-7bee730d
+            wait=yes
+            assign_public_ip=yes
+    register: ec2vps
+  - name: Add new droplet to host group
+    local_action: add_host hostname="{{ ec2vps.instances[0].public_ip }}" groupname=launched ansible_ssh_user=ubuntu
+  - name: Wait for SSH to come up
+    local_action: wait_for host="{{ ec2vps.instances[0].public_ip }}" port=22 delay=60 timeout=320 state=started
+
+- hosts: launched
+  gather_facts: False  
+  tasks:
+  - name: install python 2
+    raw: test -e /usr/bin/python || (sudo apt -y update && sudo apt install -y python-minimal)
+  - include: php.yml
+
+  handlers:
+   - name: restart php-fpm
+     become: yes
+     become_user: root
+     service: name=php7.2-fpm state=restarted
+
+
+
+
+
+
+
+
+
+

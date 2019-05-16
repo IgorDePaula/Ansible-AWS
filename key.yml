@@ -1,0 +1,16 @@
+--- 
+- name: Generate remote key
+  hosts: localhost
+  connection: local
+  gather_facts: no
+  tasks: 
+    - name: "Create a new EC2 key"
+      local_action: 
+        module: ec2_key 
+          name=test-key 
+          region=us-east-1
+      register: ec2_key_result
+    - name: Save private key
+      copy: content="{{ ec2_key_result.key.private_key }}" dest=./test.pem mode=0600
+      when: ec2_key_result.changed
+
