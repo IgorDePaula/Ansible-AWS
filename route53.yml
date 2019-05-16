@@ -1,0 +1,20 @@
+- name: route 53 launcher
+  hosts: localhost
+  connection: local
+  tasks:
+  - name: create a public zone
+    local_action:
+      module: route53_zone
+        zone=foo.com
+  - name: lauching route 53
+    local_action:
+      module: route53
+        state=present
+        zone=foo.com
+        record=new.foo.com
+        type=A
+        ttl=7200
+        value=1.1.1.1,2.2.2.2,3.3.3.3
+        wait=yes
+    register: r53
+  - debug: var=r53

@@ -1,6 +1,5 @@
 - name: s3 launcher
   hosts: localhost
-  remote_user: ubuntu
   connection: local
   tasks:
   - name: lauching s3 bucket
