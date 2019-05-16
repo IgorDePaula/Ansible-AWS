@@ -1,0 +1,14 @@
+- name: s3 launcher
+  hosts: localhost
+  remote_user: ubuntu
+  connection: local
+  tasks:
+  - name: lauching s3 bucket
+    local_action:
+      module: s3_bucket           
+            region=us-east-1
+            name=ansiblebuckettest
+            state=present
+            versioning=yes
+    register: s3_bucket
+  - debug: var=s3_bucket
