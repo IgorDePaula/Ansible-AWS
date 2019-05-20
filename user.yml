@@ -1,0 +1,22 @@
+- name: ec2 launcher
+  hosts: localhost
+  remote_user: ubuntu
+  connection: local
+  tasks:
+  
+  - name: Create two new IAM users with API keys
+    iam:
+      iam_type: user
+      name: "{{ item }}"
+      state: present
+      access_key_state: create
+    with_items:
+    - jcleese
+    - mpython
+    register: user
+  - debug: var=user
+
+
+
+
+
