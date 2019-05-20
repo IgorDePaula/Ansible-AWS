@@ -1,0 +1,47 @@
+- name: ec2 launcher
+  hosts: localhost
+  remote_user: ubuntu
+  connection: local
+  tasks:
+  - name: Create two new IAM users with API keys
+    iam:
+      iam_type: user
+      name: "{{ item }}"
+      state: present
+      access_key_state: create
+    with_items:
+    - jcleese
+    register: user
+  - debug: var=user
+  - name: Create two new IAM users with API keys
+    iam_policy:
+      iam_type: user
+      iam_name: "{{ item  }}"
+      policy_name: "s3_limited_access_teste_s3"
+      state: present
+      policy_json: {
+                     "Version": "2012-10-17",
+                     "Statement": [
+                                    {
+                                      "Sid": "VisualEditor0",
+                                      "Effect": "Allow",
+                                      "Action": [
+                                        "s3:PutObject",
+                                        "s3:GetObject",
+                                        "s3:RestoreObject",
+                                        "s3:DeleteObject",
+                                        "s3:GetObjectVersion"
+                                      ],
+                                     "Resource": "arn:aws:s3:::uploads-tandle/*"
+                                    }
+                                   ]
+                    }
+    with_items:
+    - jcleese
+    register: user_policy
+  - debug: var=user_policy
+
+
+
+
+
